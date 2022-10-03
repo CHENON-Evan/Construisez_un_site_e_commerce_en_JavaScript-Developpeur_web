@@ -1,38 +1,10 @@
-console.log("je suis sur la page index")
-
-/**fetch("http://localhost:3000/api/products")
-  .then(function (res) {
-    console.log(res)
-    if (res.ok === true) {
-      return res.json()
-    }
-  })
-  .then(function (kanaps) {
-    console.log(kanaps)
-    console.log(kanaps[3].name)
-    kanaps.forEach(function (kanap) {
-      console.log(kanap.name)
-    })
-  })
-
-const anchor = document.createElement("a")
-anchor.href = "http://localhost:3000/images/kanap01.jpeg"
-anchor.text = "Un canapé Bleu deux places"
-
-const items = document.querySelector("#items")
-if (items) {
-  items.appendChild(anchor)
-}**/
-
 fetch("http://localhost:3000/api/products")
   .then((res) => res.json())
   .then((data) => addProducts(data))
 
 function addProducts(data) {
-  
-  data.forEach((Kanap) => {
-    console.log("Kanap: ", Kanap)
 
+  data.forEach((Kanap) => {
     //const _id = data[0]._id
     //const imageUrl = data[0].imageUrl
     //const altTxt = data[0].altTxt
@@ -65,10 +37,8 @@ function makeAnchor(id) {
 
 function appendArticleToAnchor(anchor, article) {
   const items = document.querySelector("#items")
-  if (items) {
-    items.appendChild(anchor)
-    anchor.appendChild(article)
-  }
+  items.appendChild(anchor)
+  anchor.appendChild(article)
 }
 
 function makeImage(imageUrl, altTxt) {
