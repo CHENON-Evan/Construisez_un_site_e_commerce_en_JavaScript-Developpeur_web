@@ -5,12 +5,6 @@ fetch("http://localhost:3000/api/products")
 function addProducts(data) {
 
   data.forEach((Kanap) => {
-    //const _id = data[0]._id
-    //const imageUrl = data[0].imageUrl
-    //const altTxt = data[0].altTxt
-    //const name = data[0].name
-    //const description = data[0].description
-
     const { _id, imageUrl, altTxt, name, description } = Kanap
     const anchor = makeAnchor(_id)
     const article = document.createElement("article")
