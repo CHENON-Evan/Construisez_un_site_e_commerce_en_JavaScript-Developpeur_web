@@ -9,6 +9,9 @@ function getProductIdFromUrl(){
 }
 
 function displayProduct(kanap){
+
+    const { _id } = kanap
+
     const title = document.querySelector("#title")
     title.innerHTML = kanap.name
 
@@ -28,4 +31,18 @@ function displayProduct(kanap){
     for (i = 0; i < kanap.colors.length; i++) {
       color.innerHTML += `<option value="${kanap.colors[i]}">${kanap.colors[i]}</option>`
     }
+
+    document.querySelector("#addToCart").addEventListener('click', (e) => {
+      e.preventDefault();
+    
+      const data = {
+      id: _id,
+      nom: `${kanap.name}`,
+      couleur: document.querySelector("#colors").value,
+      quantite: parseInt(document.querySelector("#quantity").value),
+      prix: `${kanap.price}`,
+    }
+      localStorage.setItem(_id, JSON.stringify(data))
+      window.location.href = "cart.html"
+    })
 }
