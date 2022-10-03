@@ -37,10 +37,10 @@ function displayProduct(kanap){
     
       const data = {
       id: _id,
-      nom: `${kanap.name}`,
-      couleur: document.querySelector("#colors").value,
-      quantite: parseInt(document.querySelector("#quantity").value),
-      prix: `${kanap.price}`,
+      color: document.querySelector("#colors").value,
+      quantity: parseInt(document.querySelector("#quantity").value),
+      price: kanap.price,
+      alt: kanap.altTxt
     }
       localStorage.setItem(_id, JSON.stringify(data))
       window.location.href = "cart.html"
