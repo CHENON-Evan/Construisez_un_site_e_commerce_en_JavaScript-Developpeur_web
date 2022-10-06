@@ -35,32 +35,65 @@ function handleEvents(kanap) {
       id: kanap._id,
       color: document.querySelector('#colors').value,
       quantity: parseInt(document.querySelector('#quantity').value),
-      price: kanap.price
     };
+    if (areFormDataValid(productToAdd) === false){
+      return;
+    }
     addProductToLocalStorage(productToAdd);
+
+    document.location.href = 'cart.html';
   });
   // Other events ...
 }
 
-function addProductToLocalStorage(productToAdd) {
+function areFormDataValid(productToAdd) {
+  if (productToAdd.color === '') {
+      alert('Select a valid color');
+      return false;
+  }
+
+  if (productToAdd.quantity <= 0) {
+      alert('Select a valid quantity');
+      return false;
+  }
+  return true;
+}
+
+function getProductToLocalStorage(productToAdd) {
   // get list products from local storage 
   const productsFromLocalStorage = localStorage.getItem('products') 
 
   // if the list exists push the new product to the list
-  let productsToAdd
-
-  if (productsFromLocalStorage){
-    productsToAdd = JSON.parse(productsFromLocalStorage)
-    console.log(productsFromLocalStorage)
-    productsToAdd.push(productToAdd)
+  if (productToAdd == null){
+    return[]
   }
-
-  // else create the list with the products 
-
+   // else create the list with the products 
   else {
-    productsToAdd = [productToAdd]
+    return JSON.parse(productsFromLocalStorage)
+  }
+}
+
+function addProductToLocalStorage(productToAdd) {
+  
+  let productFromLocalStorage = getProductToLocalStorage(productToAdd);
+  let productKeyToLocalStorage = findProductKeyToLocalStorage(productToAdd, productFromLocalStorage);
+
+  if (productKeyToLocalStorage === null) {
+    productFromLocalStorage.push(productToAdd);
+  } else {
+    productFromLocalStorage[productKeyToLocalStorage].quantity += productToAdd.quantity;
   }
 
-  localStorage.setItem('products', JSON.stringify(productsToAdd));
-  window.location.href = 'cart.html';
+  localStorage.setItem('products', JSON.stringify(productFromLocalStorage));
+}
+
+function findProductKeyToLocalStorage(productToAdd, products) {
+  let productKeyFound = null;
+
+  products.forEach(function (kanap, key) {
+    if (kanap.id === productToAdd.id && kanap.color === productToAdd.color) {
+      productKeyFound = key;
+    }
+  });
+  return productKeyFound;
 }
