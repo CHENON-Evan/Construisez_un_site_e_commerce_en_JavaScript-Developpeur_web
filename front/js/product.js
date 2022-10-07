@@ -11,7 +11,6 @@ function getProductIdFromUrl() {
 }
 
 function displayProduct(kanap) {
-  console.log('kanap', kanap);
 
   document.querySelector('#title').innerHTML = kanap.name;
   document.querySelector('#price').innerHTML = kanap.price;
