@@ -94,5 +94,6 @@ function findProductKeyToLocalStorage(productToAdd, products) {
       productKeyFound = key;
     }
   });
-  return productKeyFound;
+ 
+ return productKeyFound;
 }
