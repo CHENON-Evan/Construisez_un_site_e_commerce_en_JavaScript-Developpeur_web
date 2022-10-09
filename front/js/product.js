@@ -58,23 +58,23 @@ function areFormDataValid(productToAdd) {
   return true;
 }
 
-function getProductToLocalStorage(productToAdd) {
+function getProductFromLocalStorage() {
   // get list products from local storage 
-  const productsFromLocalStorage = localStorage.getItem('products') 
+  const products = localStorage.getItem('products') 
 
   // if the list exists push the new product to the list
-  if (productToAdd == null){
+  if (products == null){
     return[]
   }
    // else create the list with the products 
   else {
-    return JSON.parse(productsFromLocalStorage)
+    return JSON.parse(products)
   }
 }
 
 function addProductToLocalStorage(productToAdd) {
   
-  let productFromLocalStorage = getProductToLocalStorage(productToAdd);
+  let productFromLocalStorage = getProductFromLocalStorage();
   let productKeyToLocalStorage = findProductKeyToLocalStorage(productToAdd, productFromLocalStorage);
 
   if (productKeyToLocalStorage === null) {
