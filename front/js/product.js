@@ -47,26 +47,23 @@ function handleEvents(kanap) {
 
 function areFormDataValid(productToAdd) {
   if (productToAdd.color === '') {
-      alert('Select a valid color');
+      alert('Sélectionner une couleur valide');
       return false;
   }
 
   if (productToAdd.quantity <= 0) {
-      alert('Select a valid quantity');
+      alert('Sélectionner une qunatité valide');
       return false;
   }
   return true;
 }
 
 function getProductFromLocalStorage() {
-  // get list products from local storage 
   const products = localStorage.getItem('products') 
 
-  // if the list exists push the new product to the list
   if (products == null){
     return[]
   }
-   // else create the list with the products 
   else {
     return JSON.parse(products)
   }
