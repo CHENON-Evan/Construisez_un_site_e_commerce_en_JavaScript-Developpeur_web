@@ -35,21 +35,34 @@ function retrieveKanap(kanapFromLocalStorage, kanapsFromAPI) {
 
 function displayProducts(kanapsFromAPI) {
   const kanapsFromLocalStorage = retrieveProductsFromLocalStorage();
+  if (!kanapsFromLocalStorage) {
+    return;
+  }
   kanapsFromLocalStorage.forEach(function (kanapFromLocalStorage) {
     const kanap = retrieveKanap(kanapFromLocalStorage, kanapsFromAPI);
     const article = makeArticle(kanap);
     const div = makeImage(kanap);
     article.appendChild(div);
-    const cardProductContent = makeCardContent(kanap);
+    const cardProductContent = makeCardContent(kanap, kanapsFromAPI);
     article.appendChild(cardProductContent);
     displayArticle(article);
-    updatePriceAndQuantity(kanap);
-    displayTotalQuantityAndPrice(kanap);
+    updateTotalPriceAndQuantity(kanapsFromAPI);
   });
 }
 
 function displayArticle(article) {
-  document.querySelector('#cart__items').appendChild(article);
+  let sameArticle = null;
+  document.querySelectorAll('.cart__item').forEach(function (item) {
+    if (item.dataset.id === article.dataset.id) {
+      sameArticle = item;
+    }
+  });
+  // If the article already exists with another color, add it after
+  if (sameArticle) {
+    sameArticle.after(article);
+  } else {
+    document.querySelector('#cart__items').appendChild(article);
+  }
 }
 
 function makeArticle(kanap) {
@@ -71,12 +84,12 @@ function makeImage(kanap) {
   return div;
 }
 
-function makeCardContent(kanap) {
+function makeCardContent(kanap, kanapsFromAPI) {
   const cardItemContent = document.createElement('div');
   cardItemContent.classList.add('cart__item__content');
 
   const description = makeDescription(kanap);
-  const settings = makeSettings(kanap);
+  const settings = makeSettings(kanap, kanapsFromAPI);
 
   cardItemContent.appendChild(description);
   cardItemContent.appendChild(settings);
@@ -100,21 +113,21 @@ function makeDescription(kanap) {
   return description;
 }
 
-function makeSettings(kanap) {
+function makeSettings(kanap, kanapsFromAPI) {
   const settings = document.createElement('div');
   settings.classList.add('cart__item__content__settings');
 
-  addQuantityToSettings(settings, kanap);
-  deleteEvent(settings);
+  addQuantityToSettings(settings, kanap, kanapsFromAPI);
+  deleteEvent(settings, kanapsFromAPI);
   return settings;
 }
 
-function addQuantityToSettings(settings, kanap) {
-  const quantity = document.createElement('div');
-  quantity.classList.add('cart__item__content__settings__quantity');
+function addQuantityToSettings(settings, kanap, kanapsFromAPI) {
+  const quantityEl = document.createElement('div');
+  quantityEl.classList.add('cart__item__content__settings__quantity');
   const p = document.createElement('p');
   p.textContent = 'Qté : ';
-  quantity.appendChild(p);
+  quantityEl.appendChild(p);
   const input = document.createElement('input');
   input.type = 'number';
   input.classList.add('itemQuantity');
@@ -122,13 +135,18 @@ function addQuantityToSettings(settings, kanap) {
   input.min = '1';
   input.max = '100';
   input.value = kanap.quantity;
-  input.addEventListener('input', () => updatePriceAndQuantity(kanap));
+  // Event : modify quantity
+  input.addEventListener('input', (e) => {
+    updateTotalPriceAndQuantity(kanapsFromAPI);
+    var quantity = e.target.value;
+    updateProductInLocalStorage(kanap, quantity);
+  });
 
-  quantity.appendChild(input);
-  settings.appendChild(quantity);
+  quantityEl.appendChild(input);
+  settings.appendChild(quantityEl);
 }
 
-function deleteEvent(settings) {
+function deleteEvent(settings, kanapsFromAPI) {
   const div = document.createElement('div');
   div.classList.add('cart__item__content__settings__delete');
   div.addEventListener('click', function (e) {
@@ -142,6 +160,7 @@ function deleteEvent(settings) {
     );
     deleteKanapInLocalStorage(productsFromLocalStorage, keyToDelete);
     article.remove();
+    updateTotalPriceAndQuantity(kanapsFromAPI);
   });
 
   const p = document.createElement('p');
@@ -150,50 +169,74 @@ function deleteEvent(settings) {
   settings.appendChild(div);
 }
 
+function findKanapKeyInLocalStorage(productsFromLocalStorage, color, id) {
+  let key = null;
+  productsFromLocalStorage.forEach(function (productFromLocalStorage, i) {
+    if (
+      productFromLocalStorage.id === id &&
+      productFromLocalStorage.color === color
+    ) {
+      key = i;
+    }
+  });
+  return key;
+}
+
 function deleteKanapInLocalStorage(productsFromLocalStorage, keyToDelete) {
   productsFromLocalStorage.splice(keyToDelete, 1);
   localStorage.setItem('products', JSON.stringify(productsFromLocalStorage));
 }
 
-function displayTotalQuantityAndPrice(kanap) {
-  const itemQuantity = document.getElementsByClassName('itemQuantity');
-  let myLength = itemQuantity.length,
-    totalQuantity = 0;
+function updateProductInLocalStorage(kanap, quantity) {
+  let productFromLocalStorage = retrieveProductsFromLocalStorage();
+  let productKeyToLocalStorage = findProductKeyToLocalStorage(
+    kanap,
+    productFromLocalStorage
+  );
 
-  for (let i = 0; i < myLength; i++) {
-    totalQuantity += itemQuantity[i].valueAsNumber;
-  }
+  productFromLocalStorage[productKeyToLocalStorage].quantity = quantity;
 
-  totalPrice = 0;
-
-  for (let i = 0; i < myLength; i++) {
-    totalPrice += kanap.price * itemQuantity[i].valueAsNumber;
-  }
-
-  let productTotalQuantityAndPrice = document.getElementById('totalPrice');
-  productTotalQuantityAndPrice.innerHTML = totalPrice;
+  localStorage.setItem('products', JSON.stringify(productFromLocalStorage));
 }
 
-function updatePriceAndQuantity(kanap) {
-  const itemQuantity = document.getElementsByClassName('itemQuantity');
-  let myLength = itemQuantity.length,
-    itemToUpdate = 0;
+function findProductKeyToLocalStorage(productToAdd, products) {
+  let productKeyFound = null;
 
-  for (let i = 0; i < myLength; i++) {
-    itemToUpdate += itemQuantity[i].valueAsNumber;
-  }
+  products.forEach(function (kanap, key) {
+    if (kanap.id === productToAdd.id && kanap.color === productToAdd.color) {
+      productKeyFound = key;
+    }
+  });
+  return productKeyFound;
+}
 
-  totalPrice = 0;
-
-  for (let i = 0; i < myLength; i++) {
-    totalPrice += itemQuantity[i].valueAsNumber * kanap.price;
-  }
+function updateTotalPriceAndQuantity(kanapsFromAPI) {
+  let kanapsAsObject = convertKanapsToObject(kanapsFromAPI);
+  let totalPrice = 0;
+  let totalQuantity = 0;
+  // Loop on each element in the cart
+  const cartItems = document.querySelectorAll('.cart__item');
+  cartItems.forEach(function (cartItem) {
+    let cartItemId = cartItem.dataset.id;
+    let price = kanapsAsObject[cartItemId].price;
+    let quantity = parseInt(cartItem.querySelector('.itemQuantity').value);
+    totalQuantity += quantity;
+    totalPrice += price * quantity;
+  });
 
   let updatePriceAndQuantity = document.getElementById('totalPrice');
   let productUpdatePriceAndQuantity = document.getElementById('totalQuantity');
   updatePriceAndQuantity.innerHTML = totalPrice;
-  productUpdatePriceAndQuantity.textContent = itemToUpdate;
+  productUpdatePriceAndQuantity.textContent = totalQuantity;
 }
+
+const convertKanapsToObject = (kanapsFromAPI) => {
+  var kanaps = {};
+  kanapsFromAPI.forEach(function (kanapFromAPI) {
+    kanaps[kanapFromAPI._id] = kanapFromAPI;
+  });
+  return kanaps;
+};
 
 const schemas = {
   letters: {
@@ -230,7 +273,9 @@ const validateInput = (e, schema) => {
 };
 
 const getOrderData = () => {
-  const kanap = cart.map((i) => i._id);
+  let kanapsFromLocalStorage = retrieveProductsFromLocalStorage();
+  // Build an array with the kanap ids only
+  const products = kanapsFromLocalStorage.map((i) => i.id);
   const contact = {
     firstName: firstNameInputElem.value.trim(),
     lastName: lastNameInputElem.value.trim(),
@@ -238,29 +283,41 @@ const getOrderData = () => {
     city: cityInputElem.value.trim(),
     email: emailInputElem.value.trim(),
   };
-  return { kanap, contact };
+  return { products, contact };
 };
 
 const sendOrder = async () => {
   try {
     const order = getOrderData();
 
-    if (order.kanap.length)
+    if (order.products.length < 1)
       throw Error('Attention, votre panier doit contenir au moins 1 article');
 
-    const { orderId } = await fetch('http://localhost:3000/api/products/order', {
+    fetch('http://localhost:3000/api/products/order', {
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
       method: 'POST',
-      body: order,
-    });
-
-    localStorage.removeItem('kanap');
-    window.location.replace(`confirmation.html?order=${orderId}`);
+      body: JSON.stringify(order),
+    })
+      .then(function (stream) {
+        return stream.json();
+      })
+      .then(function (response) {
+        localStorage.removeItem('products');
+        window.location.replace(`confirmation.html?order=${response.orderId}`);
+      });
   } catch (e) {
     alert(e.message);
   }
 };
 
-const handleorderFormElem = (e) => {
+const orderFormElem = document.querySelector('.cart__order__form');
+const firstNameInputElem = document.querySelector('#firstName');
+const lastNameInputElem = document.querySelector('#lastName');
+const addressInputElem = document.querySelector('#address');
+const cityInputElem = document.querySelector('#city');
+const emailInputElem = document.querySelector('#email');
+
+orderFormElem.addEventListener('submit', function (e) {
   e.preventDefault();
 
   const inputElems = Array.from(
@@ -271,19 +328,12 @@ const handleorderFormElem = (e) => {
   if (hasErrors) return;
 
   sendOrder();
-};
+});
 
-const orderFormElem = document.querySelector('.cart__order__form');
-const firstNameInputElem = document.querySelector('#firstName');
-const lastNameInputElem = document.querySelector('#lastName');
-const addressInputElem = document.querySelector('#address');
-const cityInputElem = document.querySelector('#city');
-const emailInputElem = document.querySelector('#email');
-
-orderFormElem.addEventListener('submit', handleorderFormElem);
 firstNameInputElem.addEventListener('input', (e) =>
   validateInput(e, schemas.letters)
 );
+
 lastNameInputElem.addEventListener('input', (e) =>
   validateInput(e, schemas.letters)
 );
