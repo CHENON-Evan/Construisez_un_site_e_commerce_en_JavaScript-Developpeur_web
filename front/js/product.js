@@ -28,7 +28,6 @@ function displayProduct(kanap) {
 }
 
 function handleEvents(kanap) {
-  // Event : Add product to cart
   document.querySelector('#addToCart').addEventListener('click', (e) => {
     const productToAdd = {
       id: kanap._id,
@@ -42,7 +41,6 @@ function handleEvents(kanap) {
 
     document.location.href = 'cart.html';
   });
-  // Other events ...
 }
 
 function areFormDataValid(productToAdd) {
