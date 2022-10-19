@@ -45,12 +45,12 @@ function handleEvents(kanap) {
 
 function areFormDataValid(productToAdd) {
   if (productToAdd.color === '') {
-      alert('Sélectionner une couleur valide');
+      alert('Select a valid color');
       return false;
   }
 
   if (productToAdd.quantity <= 0) {
-      alert('Sélectionner une qunatité valide');
+      alert('Select a valid quantity');
       return false;
   }
   return true;

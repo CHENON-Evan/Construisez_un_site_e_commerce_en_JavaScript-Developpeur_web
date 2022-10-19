@@ -241,16 +241,16 @@ const convertKanapsToObject = (kanapsFromAPI) => {
 const schemas = {
   letters: {
     regex: /^[A-Za-zÀ-ÿ-' ]{3,}$/g,
-    message: 'Minimum 3 caractères, lettres uniquement',
+    message: 'Select minimum 3 characters, letters only',
   },
   lettersDigits: {
     regex: /^[0-9A-Za-zÀ-ÿ-', ]{3,}$/g,
-    message: 'Minimum 3 caractères, chiffres et lettres uniquement',
+    message: 'Select minimum 3 characters, numbers and letters only',
   },
   email: {
     regex:
       /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
-    message: 'Adresse email non valide',
+    message: 'Email address Invalid',
   },
 };
 
@@ -291,7 +291,7 @@ const sendOrder = async () => {
     const order = getOrderData();
 
     if (order.products.length < 1)
-      throw Error('Attention, votre panier doit contenir au moins 1 article');
+      throw Error('Please note that your basket must contain at least 1 item');
 
     fetch('http://localhost:3000/api/products/order', {
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -345,4 +345,4 @@ cityInputElem.addEventListener('input', (e) =>
 );
 emailInputElem.addEventListener('input', (e) =>
   validateInput(e, schemas.email)
-);
+)
